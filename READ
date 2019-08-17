@@ -1,0 +1,6 @@
+mazebot solver
+
+-take in data from api
+-create 'maze' to be represeted as 2d matrix
+-get initial info on starting and ending pos
+-solve the maze

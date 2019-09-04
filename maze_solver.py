@@ -2,6 +2,13 @@
 #this is going to solve mazes given from this challenge
 #their api must be used
 
+
+
+#~~~~~~~~~~~~~NOTES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+# Dealing with the problem of the end-pos x and y are flipped at some point and dont know why
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+
 #map items
 # ' ' = space is a place to walk
 # 'X' = wall
@@ -45,6 +52,10 @@ def create_map(data, x_map_size, y_map_size):
 
 
 def solve_maze(map,start_pos,end_pos,ppath): #start the bfs
+    #Useful Info
+    #print(list(q.queue)) = prints the queue
+    #q.get = removes front of Queue
+    #q.put = puts at back of queue
     for x in map:
         print(x)
     print("")
@@ -54,43 +65,66 @@ def solve_maze(map,start_pos,end_pos,ppath): #start the bfs
     q = queue.Queue()
     #put the first item in the que
     q.put(start_pos)
+    print("Starting position is = ",end="")
+    print(start_pos)
+
+    ppath[start_pos[0],start_pos[1]] = (-1,-1)
     #startt the maze solve with the first pos making this a v
-    #marking as visited will just change to v
-    map[start_pos[1]][start_pos[0]] = "v"
+    #marking as visited will just change to
+    map[start_pos[0]][start_pos[1]] = "v"
     #while we have not found the solution
     while(q.empty() == False):
         #recent in the node first in the que to be visited
+        #print(list(q.queue))
         recent = q.queue[0]
+        #print("Recent is = ",end="")
+        #print(recent)
         #if we have found the end print
+        '''
         if(map[recent[1]][recent[0]] == 'B'):
+            print("dont want this to happen")
             print('found it')
             return True
+        '''
         #pop that recent item
+
         q.get(recent)
+        #print("recent is the most recent point = ",end="")
+        #print(recent)
         #this is to get the x and y cord to find neighbors
-        ycord = recent[0]
-        xcord = recent[1]
+        xcord = recent[0]
+        ycord = recent[1]
+
+        '''
+        print("x cord of recent = ",end="")
+        print(xcord)
+        print("y cord of recent = ",end="")
+        print(ycord)
+        '''
         #get all the neighbors
-        neighbors =  [[ycord+1,xcord], #above
-                      [ycord-1,xcord], #below
-                      [ycord,xcord+1], #right
-                      [ycord,xcord-1],] #leftde
+
+        neighbors =  [[xcord+1,ycord], #right
+                      [xcord-1,ycord], #left
+                      [xcord,ycord+1], #above
+                      [xcord,ycord-1],] #below
         #for in all the nieghbors find if it is the end
         for x in neighbors:
             try:
-                if(map[x[1]][x[0]] == 'B'):
-                    ppath[x[1],x[0]] = (recent[1],recent[0])
-                    print("found it")
-                    return True
-                if(map[x[1]][x[0]] != 'v' and map[x[1]][x[0]] != 'X'): #this is to see if it has been previously been visited
+                if(map[x[1]][x[0]] == 'B' and x[0] >= 0 and x[1] >= 0):
+                    ppath[x[0],x[1]] = (recent[0],recent[1])
+                    print("found it at ",end = "")
+                    print((x[0],x[1]))
+                    return map,ppath
+                if(map[x[1]][x[0]] != 'v' and map[x[1]][x[0]] != 'X' and x[0] >= 0 and x[1] >= 0): #this is to see if it has been previously been visited
                     #if it has not been visited put it into the queue
                     q.put(x)
                     #mark it as visited
                     map[x[1]][x[0]] = 'v'
-                    ppath[x[1],x[0]] = (recent[1],recent[0])
+                    ppath[x[0],x[1]] = (recent[0],recent[1])
             except IndexError:
                 pass
-        return map, ppath
+    return map, ppath
+
 
     #we now have solved the maze and want to print the final product
 
@@ -107,21 +141,70 @@ def main():
     with urllib.request.urlopen('https://api.noopschallenge.com/mazebot/random?minSize=10&maxSize=15') as url:
         data = json.loads(url.read().decode())
     #process the raw data and get variables below
-    x_map_size, y_map_size, start_pos, end_pos = data_processing(data)
+    #
+    #x_map_size, y_map_size, start_pos, end_pos = data_processing(data)
+    #
+    x_map_size = 10
+    y_map_size = 10
+    start_pos = [6,2]
+    end_pos = [9,8]
     #create the map just a 2D array of points
-    map = create_map(data,x_map_size,y_map_size)
+    map = [['X', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
+           [' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X'],
+           [' ', 'X', ' ', 'X', ' ', 'X', 'A', ' ', 'X', 'X'],
+           [' ', 'X', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X'],
+           [' ', 'X', 'X', 'X', 'X', ' ', 'X', ' ', 'X', 'X'],
+           [' ', ' ', ' ', ' ', 'X', ' ', 'X', ' ', ' ', 'X'],
+           ['X', 'X', 'X', ' ', 'X', ' ', ' ', ' ', 'X', ' '],
+           [' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', ' ', ' '],
+           [' ', 'X', 'X', 'X', ' ', ' ', ' ', 'X', 'X', 'B'],
+           [' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ']]
+
+    #
+    #so with map indeces map[position on vertical][position on horizontal]
+    #                    map[what row][what column]
+    #                    map[how many down][how many sideways]
+    #                    map[y][x]
+    #
+    #map = create_map(data,x_map_size,y_map_size)
+    #
     #map is currently made up of 'X',' ','A','B', could move and make spaces into v for visited
     #make the map
+
     map,ppath = solve_maze(map,start_pos,end_pos,ppath)
-    '''
+    print("OUT OF MAZE SOLVER")
+    print("value of end pos = ",end="")
+    print(end_pos)
     for x in map:
         print(x)
-    while(True):
-        try:
-            print(ppath[end_pos[1],end_pos[0]])
-        except SyntaxError:
-            pass
-            '''
+
+    temp1 = end_pos
+    print("start pos",start_pos)
+    print("end_pos",temp1)
+    '''
+    print(ppath[end_pos[0],end_pos[1]])
+    end1=ppath[end_pos[0],end_pos[1]]
+    print(ppath[end1[0],end1[1]])
+    '''
+    #temp1 = ppath[temp1[0],temp1[1]]
+    while(temp1[0] != start_pos[0] or temp1[1] != start_pos[1]):
+        recent = temp1
+        #print(ppath[temp1[0],temp1[1]])
+        temp1 = ppath[temp1[0],temp1[1]]
+        if(temp1[0]>recent[0]):
+            print(temp1,recent)
+            print("E")
+        if(temp1[0]<recent[0]):
+            print(temp1,recent)
+            print("W")
+        if(temp1[1]<recent[1]):
+            print(temp1,recent)
+            print("N")
+        if(temp1[1]>recent[1]):
+            print(temp1,recent)
+            print("S")
+
+
 
 
 

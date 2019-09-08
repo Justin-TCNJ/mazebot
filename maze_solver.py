@@ -56,24 +56,36 @@ def solve_maze(map,start_pos,end_pos,ppath): #start the bfs
     #print(list(q.queue)) = prints the queue
     #q.get = removes front of Queue
     #q.put = puts at back of queue
-    for x in map:
-        print(x)
-    print("")
+    #for x in map:
+    #    print(x)
+    #print("")
     #x_pos[y corrdinate][x corrdinate]
     #bc of 2d array format ^ is true
     #que holds all the nodes that are going to visited
     q = queue.Queue()
     #put the first item in the que
     q.put(start_pos)
-    print("Starting position is = ",end="")
-    print(start_pos)
+    #print("Starting position is = ",end="")
+    #print(start_pos)
 
+    #THIS MIGHT BE BAD
     ppath[start_pos[0],start_pos[1]] = (-1,-1)
+    #THIS MIGHT BE BAD
+
     #startt the maze solve with the first pos making this a v
     #marking as visited will just change to
-    map[start_pos[0]][start_pos[1]] = "v"
+    #print("start pos = ")
+    #print(start_pos[0],start_pos[1])
+    map[start_pos[1]][start_pos[0]] = "v"
     #while we have not found the solution
     while(q.empty() == False):
+        '''
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        for x in map:
+            print(x)
+        print("")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        '''
         #recent in the node first in the que to be visited
         #print(list(q.queue))
         recent = q.queue[0]
@@ -112,10 +124,10 @@ def solve_maze(map,start_pos,end_pos,ppath): #start the bfs
             try:
                 if(map[x[1]][x[0]] == 'B' and x[0] >= 0 and x[1] >= 0):
                     ppath[x[0],x[1]] = (recent[0],recent[1])
-                    print("found it at ",end = "")
-                    print((x[0],x[1]))
+                    #print("found it at ",end = "")
+                    #print((x[0],x[1]))
                     return map,ppath
-                if(map[x[1]][x[0]] != 'v' and map[x[1]][x[0]] != 'X' and x[0] >= 0 and x[1] >= 0): #this is to see if it has been previously been visited
+                if(map[x[1]][x[0]] != 'v' and map[x[1]][x[0]] != 'X' and x[0] >= 0 and x[1] >= 0): #this is to see if it has been previously been visited or unable
                     #if it has not been visited put it into the queue
                     q.put(x)
                     #mark it as visited
@@ -123,6 +135,9 @@ def solve_maze(map,start_pos,end_pos,ppath): #start the bfs
                     ppath[x[0],x[1]] = (recent[0],recent[1])
             except IndexError:
                 pass
+        #print("--------------------------------")
+        #for x in map:
+        #    print(x)
     return map, ppath
 
 
@@ -142,13 +157,10 @@ def main():
         data = json.loads(url.read().decode())
     #process the raw data and get variables below
     #
-    #x_map_size, y_map_size, start_pos, end_pos = data_processing(data)
+    x_map_size, y_map_size, start_pos, end_pos = data_processing(data)
     #
-    x_map_size = 10
-    y_map_size = 10
-    start_pos = [6,2]
-    end_pos = [9,8]
     #create the map just a 2D array of points
+    '''
     map = [['X', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
            [' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X'],
            [' ', 'X', ' ', 'X', ' ', 'X', 'A', ' ', 'X', 'X'],
@@ -159,50 +171,66 @@ def main():
            [' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', ' ', ' '],
            [' ', 'X', 'X', 'X', ' ', ' ', ' ', 'X', 'X', 'B'],
            [' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ']]
+    '''
+    '''
+    #This testing was to see what the x and y are
 
-    #
+    for x in map:
+        print (x)
+    print("This is testing the map")
+    print(map[2][6])
+    '''
     #so with map indeces map[position on vertical][position on horizontal]
     #                    map[what row][what column]
     #                    map[how many down][how many sideways]
     #                    map[y][x]
     #
-    #map = create_map(data,x_map_size,y_map_size)
+    map = create_map(data,x_map_size,y_map_size)
     #
     #map is currently made up of 'X',' ','A','B', could move and make spaces into v for visited
     #make the map
 
     map,ppath = solve_maze(map,start_pos,end_pos,ppath)
-    print("OUT OF MAZE SOLVER")
-    print("value of end pos = ",end="")
-    print(end_pos)
-    for x in map:
-        print(x)
+    #print("OUT OF MAZE SOLVER")
+    #print("value of end pos = ",end="")
+    #print(end_pos)
+    map[start_pos[0]][start_pos[1]] = "A"
+    #for x in map:
+    #    print(x)
 
-    temp1 = end_pos
-    print("start pos",start_pos)
-    print("end_pos",temp1)
+    new1 = end_pos
+    #print("start pos",start_pos)
+    #print("end_pos",end_pos)
     '''
+    print("Parent of end pos ",end = "")
     print(ppath[end_pos[0],end_pos[1]])
     end1=ppath[end_pos[0],end_pos[1]]
+    print("The parent of that parent", end = "")
     print(ppath[end1[0],end1[1]])
+    ''
+    print("THIS IS A TEST   ",end="")
+    print(ppath[3,7])
     '''
     #temp1 = ppath[temp1[0],temp1[1]]
-    while(temp1[0] != start_pos[0] or temp1[1] != start_pos[1]):
-        recent = temp1
-        #print(ppath[temp1[0],temp1[1]])
-        temp1 = ppath[temp1[0],temp1[1]]
-        if(temp1[0]>recent[0]):
-            print(temp1,recent)
-            print("E")
-        if(temp1[0]<recent[0]):
-            print(temp1,recent)
-            print("W")
-        if(temp1[1]<recent[1]):
-            print(temp1,recent)
-            print("N")
-        if(temp1[1]>recent[1]):
-            print(temp1,recent)
-            print("S")
+    while(new1[0] != start_pos[0] or new1[1] != start_pos[1]):
+        #print("The parent of the new node is ",end = "")
+        #print(ppath[new1[0],new1[1]],end="")
+
+        recent = new1
+        new1 = ppath[new1[0],new1[1]]
+        if(new1[0]>recent[0]):
+            #print(temp1,recent)
+            print("E",end = '')
+        if(new1[0]<recent[0]):
+            #print(temp1,recent)
+            print("W",end = '')
+        if(new1[1]>recent[1]):
+            #print(temp1,recent)
+            print("S",end = '')
+        if(new1[1]<recent[1]):
+            #print(temp1,recent)
+            print("N",end = '')
+    print("")
 
 
 

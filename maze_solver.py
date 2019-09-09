@@ -142,6 +142,52 @@ def solve_maze(map,start_pos,end_pos,ppath): #start the bfs
 
 
     #we now have solved the maze and want to print the final product
+def direction_solver(map,start_pos,end_pos,ppath):
+    #print("OUT OF MAZE SOLVER")
+    #print("value of end pos = ",end="")
+    #print(end_pos)
+    map[start_pos[0]][start_pos[1]] = "A"
+    #for x in map:
+    #    print(x)
+
+    new1 = end_pos
+    #print("start pos",start_pos)
+    #print("end_pos",end_pos)
+    '''
+    print("Parent of end pos ",end = "")
+    print(ppath[end_pos[0],end_pos[1]])
+    end1=ppath[end_pos[0],end_pos[1]]
+    print("The parent of that parent", end = "")
+    print(ppath[end1[0],end1[1]])
+    ''
+    print("THIS IS A TEST   ",end="")
+    print(ppath[3,7])
+    '''
+    #temp1 = ppath[temp1[0],temp1[1]]
+    while(new1[0] != start_pos[0] or new1[1] != start_pos[1]):
+        #print("The parent of the new node is ",end = "")
+        #print(ppath[new1[0],new1[1]],end="")
+        direction = ""
+        recent = new1
+        new1 = ppath[new1[0],new1[1]]
+        if(new1[0]>recent[0]):
+            #print(temp1,recent)
+            print("E",end = '')
+            direction = direction + "E"
+        if(new1[0]<recent[0]):
+            #print(temp1,recent)
+            print("W",end = '')
+            direction = direction + "W"
+        if(new1[1]>recent[1]):
+            #print(temp1,recent)
+            print("S",end = '')
+            direction = direction + "S"
+        if(new1[1]<recent[1]):
+            #print(temp1,recent)
+            print("N",end = '')
+            direction = direction + "N"
+    print("")
+    return direction
 
 
 def main():
@@ -150,14 +196,19 @@ def main():
     start_pos = [0,0]
     end_pos = [0,0]
     map = []
+
     #PARENT DICT
+    #problem max size is around 100
+    theurl = 'https://api.noopschallenge.com/mazebot/random?minSize=30&maxSize=30'
     ppath = {}
     #get the json data from the site
-    with urllib.request.urlopen('https://api.noopschallenge.com/mazebot/random?minSize=10&maxSize=15') as url:
+    with urllib.request.urlopen(theurl) as url:
         data = json.loads(url.read().decode())
     #process the raw data and get variables below
     #
     x_map_size, y_map_size, start_pos, end_pos = data_processing(data)
+    print("start_pos")
+    print(start_pos)
     #
     #create the map just a 2D array of points
     '''
@@ -186,51 +237,22 @@ def main():
     #                    map[y][x]
     #
     map = create_map(data,x_map_size,y_map_size)
+    for x in map:
+        print(x)
     #
     #map is currently made up of 'X',' ','A','B', could move and make spaces into v for visited
     #make the map
 
     map,ppath = solve_maze(map,start_pos,end_pos,ppath)
-    #print("OUT OF MAZE SOLVER")
-    #print("value of end pos = ",end="")
-    #print(end_pos)
-    map[start_pos[0]][start_pos[1]] = "A"
-    #for x in map:
-    #    print(x)
 
-    new1 = end_pos
-    #print("start pos",start_pos)
-    #print("end_pos",end_pos)
-    '''
-    print("Parent of end pos ",end = "")
-    print(ppath[end_pos[0],end_pos[1]])
-    end1=ppath[end_pos[0],end_pos[1]]
-    print("The parent of that parent", end = "")
-    print(ppath[end1[0],end1[1]])
-    ''
-    print("THIS IS A TEST   ",end="")
-    print(ppath[3,7])
-    '''
-    #temp1 = ppath[temp1[0],temp1[1]]
-    while(new1[0] != start_pos[0] or new1[1] != start_pos[1]):
-        #print("The parent of the new node is ",end = "")
-        #print(ppath[new1[0],new1[1]],end="")
+    directions = direction_solver(map,start_pos,end_pos,ppath)
 
-        recent = new1
-        new1 = ppath[new1[0],new1[1]]
-        if(new1[0]>recent[0]):
-            #print(temp1,recent)
-            print("E",end = '')
-        if(new1[0]<recent[0]):
-            #print(temp1,recent)
-            print("W",end = '')
-        if(new1[1]>recent[1]):
-            #print(temp1,recent)
-            print("S",end = '')
-        if(new1[1]<recent[1]):
-            #print(temp1,recent)
-            print("N",end = '')
-    print("")
+    #r = requests.post(url, data=json.dumps(directions))
+    #with urllib.request.urlopen('https://api.noopschallenge.com/mazebot/random') as url:
+    #        data = json.loads(url.read().decode())
+    #r = requests.post('https://httpbin.org/post', directions)
+    #response = urllib.request.urlopen(theurl, json.dumps(data))
+    #POST /mazebot/race { "login": "yourgithubnamehere" }
 
 
 

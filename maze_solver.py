@@ -16,12 +16,14 @@
 
 #getting maze from online
 import urllib.request
+import urllib.parse
 import json
 import queue
-
+import requests
 
 def data_processing(data):
     #print(data)
+    post_url = data['mazePath']
     x_map_size = 0
     y_map_size = 0
     mid_pos = 0 #this is the position of the x ie 40x40
@@ -36,7 +38,7 @@ def data_processing(data):
     start_pos[1] = data["startingPosition"][1]
     end_pos[0] = data["endingPosition"][0]
     end_pos[1] = data["endingPosition"][1]
-    return x_map_size, y_map_size, start_pos, end_pos
+    return x_map_size, y_map_size, start_pos, end_pos, post_url
 
 def create_map(data, x_map_size, y_map_size):
     a = 0
@@ -164,29 +166,32 @@ def direction_solver(map,start_pos,end_pos,ppath):
     print(ppath[3,7])
     '''
     #temp1 = ppath[temp1[0],temp1[1]]
+    direction = ""
     while(new1[0] != start_pos[0] or new1[1] != start_pos[1]):
         #print("The parent of the new node is ",end = "")
         #print(ppath[new1[0],new1[1]],end="")
-        direction = ""
         recent = new1
         new1 = ppath[new1[0],new1[1]]
         if(new1[0]>recent[0]):
             #print(temp1,recent)
-            print("E",end = '')
-            direction = direction + "E"
+            #print("from "+ str(recent)+" to "+str(new1))
+            #print("E",end = '')
+            direction = direction + "W"
         if(new1[0]<recent[0]):
             #print(temp1,recent)
-            print("W",end = '')
-            direction = direction + "W"
+            #print("from "+ str(recent)+" to "+str(new1))
+            #print("W",end = '')
+            direction = direction + "E"
         if(new1[1]>recent[1]):
             #print(temp1,recent)
-            print("S",end = '')
-            direction = direction + "S"
+            #print("from "+ str(recent)+" to "+str(new1))
+            #print("S",end = '')
+            direction = direction + "N"
         if(new1[1]<recent[1]):
             #print(temp1,recent)
-            print("N",end = '')
-            direction = direction + "N"
-    print("")
+            #print("from "+ str(recent)+" to "+str(new1))
+            #print("N",end = '')
+            direction = direction + "S"
     return direction
 
 
@@ -199,46 +204,30 @@ def main():
 
     #PARENT DICT
     #problem max size is around 100
-    theurl = 'https://api.noopschallenge.com/mazebot/random?minSize=30&maxSize=30'
+    theurl = 'https://api.noopschallenge.com/mazebot/random?minSize=10&maxSize=20'
     ppath = {}
     #get the json data from the site
+    data = requests.get(theurl).json()
+    '''
     with urllib.request.urlopen(theurl) as url:
         data = json.loads(url.read().decode())
+    '''
     #process the raw data and get variables below
     #
-    x_map_size, y_map_size, start_pos, end_pos = data_processing(data)
-    print("start_pos")
-    print(start_pos)
+    x_map_size, y_map_size, start_pos, end_pos, post_url = data_processing(data)
+    #print("start_pos")
+    #print(start_pos)
     #
     #create the map just a 2D array of points
-    '''
-    map = [['X', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
-           [' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', 'X', 'X'],
-           [' ', 'X', ' ', 'X', ' ', 'X', 'A', ' ', 'X', 'X'],
-           [' ', 'X', ' ', ' ', ' ', ' ', 'X', ' ', ' ', 'X'],
-           [' ', 'X', 'X', 'X', 'X', ' ', 'X', ' ', 'X', 'X'],
-           [' ', ' ', ' ', ' ', 'X', ' ', 'X', ' ', ' ', 'X'],
-           ['X', 'X', 'X', ' ', 'X', ' ', ' ', ' ', 'X', ' '],
-           [' ', ' ', ' ', ' ', 'X', 'X', 'X', 'X', ' ', ' '],
-           [' ', 'X', 'X', 'X', ' ', ' ', ' ', 'X', 'X', 'B'],
-           [' ', ' ', ' ', ' ', ' ', 'X', ' ', ' ', ' ', ' ']]
-    '''
-    '''
-    #This testing was to see what the x and y are
 
-    for x in map:
-        print (x)
-    print("This is testing the map")
-    print(map[2][6])
-    '''
+
     #so with map indeces map[position on vertical][position on horizontal]
     #                    map[what row][what column]
     #                    map[how many down][how many sideways]
     #                    map[y][x]
     #
     map = create_map(data,x_map_size,y_map_size)
-    for x in map:
-        print(x)
+
     #
     #map is currently made up of 'X',' ','A','B', could move and make spaces into v for visited
     #make the map
@@ -247,17 +236,21 @@ def main():
 
     directions = direction_solver(map,start_pos,end_pos,ppath)
 
-    #r = requests.post(url, data=json.dumps(directions))
-    #with urllib.request.urlopen('https://api.noopschallenge.com/mazebot/random') as url:
-    #        data = json.loads(url.read().decode())
-    #r = requests.post('https://httpbin.org/post', directions)
-    #response = urllib.request.urlopen(theurl, json.dumps(data))
-    #POST /mazebot/race { "login": "yourgithubnamehere" }
+    reverse_directions = ""
+    #print("Directions = "+directions)
+    for x in directions:
+        reverse_directions = x + reverse_directions
+
+    base_url = 'https://api.noopschallenge.com'
+    post_url = base_url+post_url
 
 
+    p = requests.post(post_url, json={"directions":reverse_directions})
+    print(p.status_code)
+    print(p.json)
+    print(p.text)
 
-
-
+    
 
 if __name__ == "__main__":
     main()
